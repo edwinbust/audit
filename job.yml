@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: audit-sh
+  namespace: audit-script
+spec:
+  template:
+    spec:
+      serviceAccountName: auditor
+      restartPolicy: Never
+      containers:
+      - name: audit-sh
+        image: registry.redhat.io/openshift4/ose-cli:v4.2.19
+        command: ["/bin/sh", "-c"]
+        args:
+          - "oc get pods --all-namespaces
+              -o jsonpath='{$.items[*].spec.containers[*].image}'
+               | sed 's/ /\\\n/g'
+               | uniq
+               | sort"
+
